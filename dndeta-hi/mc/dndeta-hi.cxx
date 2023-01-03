@@ -37,7 +37,6 @@ using namespace o2::aod::track;
 
 using BCsRun3 = soa::Join<aod::BCs, aod::Timestamps, aod::BcSels, aod::Run3MatchedToBCSparse>;
 using MyMCCollisions = soa::Join<aod::Collisions, aod::EvSels>;
-using MyCollisions = soa::Join<aod::Collisions, aod::EvSels, aod::CentFT0Cs>;
 using FullBCs = soa::Join<aod::BCsWithTimestamps, aod::BcSels>;
 using ExTracks = soa::Join<aod::Tracks, aod::TracksExtra, aod::TrackSelection, aod::TracksDCA>;
 using FiTracks = soa::Filtered<ExTracks>;
@@ -88,7 +87,6 @@ struct MultiplicityCounter {
   Configurable<bool> useEvSel{"useEvSel", true, "use event selection"};
   Configurable<bool> isMC{"isMC", false, "check if MC"};
 
-  Configurable<int64_t> nolaterthan{"ccdb-no-later-than", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), "latest acceptable timestamp of creation for the object"};
   ConfigurableAxis multBinning{"multBinning", {301, -0.5, 300.5}, ""};
   AxisSpec MultAxis = {multBinning, "N"};
   Configurable<bool> CentOn{"CentOn", false, "centrality switch ; watch your ccdb timestamps"}; // on debuging..
@@ -154,78 +152,6 @@ struct MultiplicityCounter {
                                      (nabs(aod::track::bestDCAZ) <= 2.f) &&
                                      (nabs(aod::track::bestDCAXY) <= ((0.0105f + 0.0350f / npow(aod::track::pts, 1.1f))));
   std::vector<Double_t> tracketas;
-
-  void processCounting(
-    MyCollisions::iterator const& collision,
-    BCsRun3 const& bcs,
-    aod::FT0s const& ft0s,
-    aod::FV0As const& fv0as,
-    FiTracks const& tracks,
-    soa::SmallGroups<aod::ReassignedTracksCore> const& atracks)
-  {
-    const auto& foundBC = collision.foundBC_as<BCsRun3>();
-    float multT0A = 0;
-    float multT0C = 0;
-    float multV0A = 0;
-    auto cent = collision.centFT0C();
-
-    registry.fill(HIST("Centrality"), cent);
-    registry.fill(HIST("Events/Selection"), 1.);
-    auto z = collision.posZ();
-
-    if (!useEvSel || collision.sel8()) {
-      if (std::abs(z) < 10) {
-        if (foundBC.has_ft0()) {
-          for (auto amplitude : foundBC.ft0().amplitudeA()) {
-            multT0A += amplitude;
-          }
-          for (auto amplitude : foundBC.ft0().amplitudeC()) {
-            multT0C += amplitude;
-          }
-        } else {
-          multT0A = multT0C = -999;
-        }
-
-        if (foundBC.has_fv0a()) {
-          for (auto amplitude : foundBC.fv0a().amplitude()) {
-            multV0A += amplitude;
-          }
-        } else {
-          multV0A = -999;
-        }
-        registry.fill(HIST("Multiplicity"), multV0A, multT0A, multT0C);
-        registry.fill(HIST("Centrality_MBAND"), cent);
-
-        registry.fill(HIST("Events/Selection"), 2.);
-
-        registry.fill(HIST("hreczvtx"), Double_t(kDATA), Double_t(kMBAND), cent, z);
-        usedTracksIds.clear();
-
-        tracketas.clear();
-        for (auto& track : atracks) {
-          auto otrack = track.track_as<FiTracks>();
-          tracketas.push_back(otrack.eta());
-          registry.fill(HIST("PhiEta"), otrack.phi(), otrack.eta());
-          registry.fill(HIST("DCAXY"), otrack.dcaXY());
-          registry.fill(HIST("DCAZ"), otrack.dcaZ());
-        }
-        for (auto& track : tracks) {
-          if (std::find(usedTracksIds.begin(), usedTracksIds.end(), track.globalIndex()) != usedTracksIds.end()) {
-            continue;
-          }
-          registry.fill(HIST("PhiEta"), track.phi(), track.eta());
-          registry.fill(HIST("DCAXY"), track.dcaXY());
-          registry.fill(HIST("DCAZ"), track.dcaZ());
-          tracketas.push_back(track.eta());
-        }
-
-        for (auto eta : tracketas) {
-          registry.fill(HIST("hrecdndeta"), Double_t(kDATA), Double_t(kMBAND), cent, z, eta);
-        }
-      }
-    }
-  }
-  PROCESS_SWITCH(MultiplicityCounter, processCounting, "Count tracks", false);
 
   expressions::Filter primaries = (aod::mcparticle::flags & (uint8_t)o2::aod::mcparticle::enums::PhysicalPrimary) == (uint8_t)o2::aod::mcparticle::enums::PhysicalPrimary;
   Partition<Particles> mcSample = nabs(aod::mcparticle::eta) < estimatorEta;
