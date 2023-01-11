@@ -1,0 +1,106 @@
+{
+    "internal-dpl-clock": "",
+    "internal-dpl-aod-reader": {
+        "time-limit": "180",
+        "orbit-offset-enumeration": "0",
+        "orbit-multiplier-enumeration": "0",
+        "start-value-enumeration": "0",
+        "end-value-enumeration": "-1",
+        "step-value-enumeration": "1",
+        "aod-file": "@input_data.txt"
+    },
+    "internal-dpl-injected-dummy-sink": "",
+    "internal-dpl-aod-spawner": "",
+    "collision-converter": "",
+    "timestamp-task": {
+        "verbose": "false",
+        "rct-path": "RCT\/Info\/RunInformation",
+        "orbit-reset-path": "CTP\/Calib\/OrbitReset",
+        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "isRun2MC": "false"
+    },
+    "track-propagation": {
+        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "lutPath": "GLO\/Param\/MatLUT",
+        "geoPath": "GLO\/Config\/GeometryAligned",
+        "grpmagPath": "GLO\/Config\/GRPMagField",
+        "mVtxPath": "GLO\/Calib\/MeanVertex",
+        "minPropagationDistance": "5",
+        "processStandard": "true",
+        "processCovariance": "false"
+    },
+    "internal-dpl-aod-index-builder": "",
+    "bc-selection-task": {
+        "processRun2": "false",
+        "processRun3": "true"
+    },
+    "track-selection": {
+        "isRun3": "true",
+        "produceFBextendedTable": "false",
+        "compatibilityIU": "false",
+        "itsMatching": "1",
+        "ptMin": "0.100000001",
+        "ptMax": "1e+10",
+        "etaMin": "-0.800000012",
+        "etaMax": "0.800000012"
+    },
+    "ambiguous-track-propagation": {
+        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "geoPath": "GLO\/Config\/GeometryAligned",
+        "grpmagPath": "GLO\/Config\/GRPMagField",
+        "mVtxPath": "GLO\/Calib\/MeanVertex",
+        "produceExtra": "false",
+        "processCentral": "true",
+        "processMFT": "false"
+    },
+    "event-selection-task": {
+        "syst": "pp",
+        "muonSelection": "0",
+        "customDeltaBC": "300",
+        "isMC": "false",
+        "processRun2": "false",
+        "processRun3": "true"
+    },
+    "multiplicity-table": {
+        "doVertexZeq": "1",
+        "processRun2": "false",
+        "processRun3": "true"
+    },
+    "centrality-table": {
+        "estRun2V0M": "0",
+        "estRun2SPDtks": "0",
+        "estRun2SPDcls": "0",
+        "estRun2CL0": "0",
+        "estRun2CL1": "0",
+        "estFV0A": "0",
+        "estFT0M": "0",
+        "estFT0A": "0",
+        "estFT0C": "1",
+        "estFDDM": "0",
+        "estNTPV": "0",
+        "ccdburl": "http:\/\/alice-ccdb.cern.ch",
+        "ccdbpath": "Centrality\/Estimators",
+        "genname": "",
+        "processRun2": "false",
+        "processRun3": "true"
+    },
+    "multiplicity-counter": {
+        "estimatorEta": "4",
+        "useEvSel": "true",
+        "isMC": "true",
+        "multBinning": {
+            "values": [
+                "301",
+                "-0.5",
+                "300.5"
+            ]
+        },
+        "processEventStat": "true",
+        "processCounting": "true",
+        "processMCCounting": "false",
+        "processMCTrackEfficiency": "false",
+        "processGen": "false"
+    },
+    "internal-dpl-aod-global-analysis-file-sink": "",
+    "internal-dpl-aod-writer": ""
+}
