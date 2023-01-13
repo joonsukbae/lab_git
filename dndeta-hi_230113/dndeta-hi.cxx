@@ -35,34 +35,27 @@ using namespace o2::framework;
 using namespace o2::framework::expressions;
 using namespace o2::aod::track;
 
-using BCsRun3 = soa::Join<aod::BCs, aod::Timestamps, aod::BcSels, aod::Run3MatchedToBCSparse>;
+using BCsRun3 = soa::Join<aod::BCs, aod::Timestamps, aod::BcSels,
+                          aod::Run3MatchedToBCSparse>;
 using MyMCCollisions = soa::Join<aod::Collisions, aod::EvSels>;
 using MyCollisions = soa::Join<aod::Collisions, aod::EvSels, aod::CentFT0Cs>;
 using FullBCs = soa::Join<aod::BCsWithTimestamps, aod::BcSels>;
-using ExTracks = soa::Join<aod::Tracks, aod::TracksExtra, aod::TrackSelection, aod::TracksDCA>;
+using ExTracks = soa::Join<aod::Tracks, aod::TracksExtra, aod::TrackSelection,
+                           aod::TracksDCA>;
 using FiTracks = soa::Filtered<ExTracks>;
 using Particles = soa::Filtered<aod::McParticles>;
 using Particle = Particles::iterator;
 using LabeledTracks = soa::Join<aod::Tracks, aod::McTrackLabels>;
-using LabeledTracksEx = soa::Join<LabeledTracks, aod::TracksExtra, aod::TrackSelection, aod::TracksDCA>;
+using LabeledTracksEx = soa::Join<LabeledTracks, aod::TracksExtra,
+                                  aod::TrackSelection, aod::TracksDCA>;
 
-enum {
-  kECbegin = 0,
-  kDATA = 1,
-  kINEL,
-  kECend
-};
-enum {
-  kTrigbegin = 0,
-  kMBAND = 1,
-  kTrigend
-};
-enum {
-  kSTATbegin = 0,
-  kMCRUN = 0,
-  kDATARUN,
-  kSTATend
-};
+enum { kECbegin = 0,
+       kDATA = 1,
+       kINEL,
+       kECend };
+enum { kTrigbegin = 0,
+       kMBAND = 1,
+       kTrigend };
 
 AxisSpec ZAxis = {60, -30, 30, "", "zaxis"};
 AxisSpec DeltaZAxis = {61, -6.1, 6.1, "", "deltaz axis"};
@@ -70,10 +63,12 @@ AxisSpec DCAAxis = {601, -3.01, 3.01, "", "DCA axis"};
 AxisSpec EtaAxis = {80, -4.0, 4.0, "", "eta axis"};
 AxisSpec PhiAxis = {629, 0, 2 * M_PI, "", "phi axis"};
 AxisSpec PtAxis = {2401, -0.005, 24.005, "", "P_{T} axis"};
-AxisSpec EvtClassAxis = {kECend - 1, kECbegin + 0.5, kECend - 0.5, "", "event class"};
-AxisSpec TrigClassAxis = {kTrigend - 1, kTrigbegin + 0.5, kTrigend - 0.5, "", "trigger class"};
-AxisSpec DataStatusAxis = {kSTATend - 1, kSTATbegin + 0.5, kSTATend - 0.5, "", "status axis"};
-std::vector<double> centBinning = {0, 10., 20., 30., 40., 50., 60., 70., 80., 100};
+AxisSpec EvtClassAxis = {kECend - 1, kECbegin + 0.5, kECend - 0.5, "",
+                         "event class"};
+AxisSpec TrigClassAxis = {kTrigend - 1, kTrigbegin + 0.5, kTrigend - 0.5, "",
+                          "trigger class"};
+std::vector<double> centBinning = {0, 10., 20., 30., 40.,
+                                   50., 60., 70., 80., 100};
 AxisSpec CentAxis = {centBinning, "", "centrality"};
 
 static constexpr TrackSelectionFlags::flagtype trackSelectionITS =
@@ -91,38 +86,70 @@ static constexpr TrackSelectionFlags::flagtype trackSelectionDCA =
 struct MultiplicityCounter {
   Service<TDatabasePDG> pdg;
 
-  Configurable<float> estimatorEta{"estimatorEta", 1.0, "eta range for INEL>0 sample definition"};
+  Configurable<float> estimatorEta{"estimatorEta", 1.0,
+                                   "eta range for INEL>0 sample definition"};
   Configurable<bool> useEvSel{"useEvSel", true, "use event selection"};
   Configurable<bool> isMC{"isMC", false, "check if MC"};
 
   ConfigurableAxis multBinning{"multBinning", {301, -0.5, 300.5}, ""};
   AxisSpec MultAxis = {multBinning, "N"};
-  Configurable<bool> CentOn{"CentOn", false, "centrality switch ; watch your ccdb timestamps"}; // on debuging..
+  Configurable<bool> CentOn{
+    "CentOn", false,
+    "centrality switch ; watch your ccdb timestamps"}; // on debuging..
 
   HistogramRegistry registry{
     "registry",
     {
-      {"Events/Selection", ";status;events", {HistType::kTH1F, {{7, 0.5, 7.5}}}},                                                                          //
-      {"hrecdndeta", "evntclass; triggerclass; centrality, zvtex, eta", {HistType::kTHnSparseD, {EvtClassAxis, TrigClassAxis, CentAxis, ZAxis, EtaAxis}}}, //
-      {"hgendndeta", "evntclass; centrality, zvtex, eta", {HistType::kTHnSparseD, {EvtClassAxis, CentAxis, ZAxis, EtaAxis}}},                              //
-      {"hreczvtx", "evntclass; triggerclass; centrality, zvtex", {HistType::kTHnSparseD, {EvtClassAxis, TrigClassAxis, CentAxis, ZAxis}}},                 //
-      {"hgenzvtx", "evntclass; centrality, zvtex", {HistType::kTHnSparseD, {EvtClassAxis, CentAxis, ZAxis}}},                                              //
-      {"PhiEta", "; #varphi; #eta; tracks", {HistType::kTHnSparseD, {DataStatusAxis, PhiAxis, EtaAxis}}},                                                  //
-      {"DCAXY", " ; DCA_{XY} (cm)", {HistType::kTHnSparseD, {DataStatusAxis, DCAAxis}}},                                                                   //
-      {"DCAZ", " ; DCA_{Z} (cm)", {HistType::kTHnSparseD, {DataStatusAxis, DCAAxis}}},                                                                     //
-      {"Multiplicity", " ; FV0A (#); FT0A (#); FT0C (#) ", {HistType::kTHnSparseD, {MultAxis, MultAxis, MultAxis}}},                                       //
-      {"Centrality", " ; centrality_FT0C (%) ", {HistType::kTH1F, {CentAxis}}},                                                                            //
-      {"Centrality_MBAND", " ; centrality_MBAND_FT0C (%) ", {HistType::kTH1F, {CentAxis}}},                                                                //
-      {"hrecpt", " eventclass; centrality; pt_gen; pt_rec ", {HistType::kTHnSparseD, {EvtClassAxis, CentAxis, PtAxis, PtAxis}}},                           //
-      {"hgenpt", " eventclass; centrality; pt;  ", {HistType::kTHnSparseD, {EvtClassAxis, CentAxis, PtAxis}}},                                             //
-      {"hdatapt", " eventclass; centrality; pt", {HistType::kTHnSparseD, {EvtClassAxis, CentAxis, PtAxis}}}                                                //
+      {"Events/Selection",
+       ";status;events",
+       {HistType::kTH1F, {{7, 0.5, 7.5}}}}, //
+      {"hrecdndeta",
+       "evntclass; triggerclass; centrality, zvtex, eta",
+       {HistType::kTHnSparseD,
+        {EvtClassAxis, TrigClassAxis, CentAxis, ZAxis, EtaAxis}}}, //
+      {"hgendndeta",
+       "evntclass; centrality, zvtex, eta",
+       {HistType::kTHnSparseD,
+        {EvtClassAxis, CentAxis, ZAxis, EtaAxis}}}, //
+      {"hreczvtx",
+       "evntclass; triggerclass; centrality, zvtex",
+       {HistType::kTHnSparseD,
+        {EvtClassAxis, TrigClassAxis, CentAxis, ZAxis}}}, //
+      {"hgenzvtx",
+       "evntclass; centrality, zvtex",
+       {HistType::kTHnSparseD, {EvtClassAxis, CentAxis, ZAxis}}}, //
+      {"PhiEta",
+       "; #varphi; #eta; tracks",
+       {HistType::kTHnSparseD, {EvtClassAxis, PhiAxis, EtaAxis}}}, //
+      {"DCAXY",
+       " ; DCA_{XY} (cm)",
+       {HistType::kTHnSparseD, {EvtClassAxis, DCAAxis}}}, //
+      {"DCAZ",
+       " ; DCA_{Z} (cm)",
+       {HistType::kTHnSparseD, {EvtClassAxis, DCAAxis}}}, //
+      {"Multiplicity",
+       " ; FV0A (#); FT0A (#); FT0C (#) ",
+       {HistType::kTHnSparseD, {MultAxis, MultAxis, MultAxis}}}, //
+      {"Centrality",
+       " ; centrality_FT0C (%) ",
+       {HistType::kTH1F, {CentAxis}}}, //
+      {"Centrality_MBAND",
+       " ; centrality_MBAND_FT0C (%) ",
+       {HistType::kTH1F, {CentAxis}}}, //
+      {"hrecpt",
+       " eventclass; centrality; pt_gen; pt_rec ",
+       {HistType::kTHnSparseD,
+        {EvtClassAxis, CentAxis, PtAxis, PtAxis}}}, //
+      {"hgenpt",
+       " eventclass; centrality; pt;  ",
+       {HistType::kTHnSparseD, {EvtClassAxis, CentAxis, PtAxis}}} //
     }};
 
   std::vector<int> usedTracksIds;
 
-  void processEventStat(
-    FullBCs const& bcs,
-    soa::Join<aod::Collisions, aod::EvSels> const& collisions)
+  void
+    processEventStat(FullBCs const& bcs,
+                     soa::Join<aod::Collisions, aod::EvSels> const& collisions)
   {
     std::vector<typename std::decay_t<decltype(collisions)>::iterator> cols;
     for (auto& bc : bcs) {
@@ -150,25 +177,29 @@ struct MultiplicityCounter {
     }
   }
 
-  PROCESS_SWITCH(MultiplicityCounter, processEventStat, "Collect event sample stats", false);
+  PROCESS_SWITCH(MultiplicityCounter, processEventStat,
+                 "Collect event sample stats", false);
 
-  expressions::Filter trackSelectionProper = ((aod::track::trackCutFlag & trackSelectionITS) == trackSelectionITS) &&
-                                             ifnode((aod::track::detectorMap & (uint8_t)o2::aod::track::TPC) == (uint8_t)o2::aod::track::TPC,
-                                                    (aod::track::trackCutFlag & trackSelectionTPC) == trackSelectionTPC,
-                                                    true) &&
-                                             ((aod::track::trackCutFlag & trackSelectionDCA) == trackSelectionDCA);
-  expressions::Filter atrackFilter = (aod::track::bestCollisionId >= 0) &&
-                                     (nabs(aod::track::bestDCAZ) <= 2.f) &&
-                                     (nabs(aod::track::bestDCAXY) <= ((0.0105f + 0.0350f / npow(aod::track::pts, 1.1f))));
+  expressions::Filter trackSelectionProper =
+    ((aod::track::trackCutFlag & trackSelectionITS) == trackSelectionITS) &&
+    ifnode((aod::track::detectorMap & (uint8_t)o2::aod::track::TPC) ==
+             (uint8_t)o2::aod::track::TPC,
+           (aod::track::trackCutFlag & trackSelectionTPC) ==
+             trackSelectionTPC,
+           true) &&
+    ((aod::track::trackCutFlag & trackSelectionDCA) == trackSelectionDCA);
+  expressions::Filter atrackFilter =
+    (aod::track::bestCollisionId >= 0) &&
+    (nabs(aod::track::bestDCAZ) <= 2.f) &&
+    (nabs(aod::track::bestDCAXY) <=
+     ((0.0105f + 0.0350f / npow(aod::track::pts, 1.1f))));
   std::vector<Double_t> tracketas;
 
-  void processCounting(
-    MyCollisions::iterator const& collision,
-    BCsRun3 const& bcs,
-    aod::FT0s const& ft0s,
-    aod::FV0As const& fv0as,
-    FiTracks const& tracks,
-    soa::SmallGroups<aod::ReassignedTracksCore> const& atracks)
+  void
+    processCounting(MyCollisions::iterator const& collision, BCsRun3 const& bcs,
+                    aod::FT0s const& ft0s, aod::FV0As const& fv0as,
+                    FiTracks const& tracks,
+                    soa::SmallGroups<aod::ReassignedTracksCore> const& atracks)
   {
     const auto& foundBC = collision.foundBC_as<BCsRun3>();
     float multT0A = 0;
@@ -205,118 +236,54 @@ struct MultiplicityCounter {
 
         registry.fill(HIST("Events/Selection"), 2.);
 
-        registry.fill(HIST("hreczvtx"), Double_t(kDATA), Double_t(kMBAND), cent, z);
+        registry.fill(HIST("hreczvtx"), Double_t(kDATA), Double_t(kMBAND), cent,
+                      z);
         usedTracksIds.clear();
 
         tracketas.clear();
         for (auto& track : atracks) {
           auto otrack = track.track_as<FiTracks>();
           tracketas.push_back(otrack.eta());
-          registry.fill(HIST("PhiEta"), Double_t(kDATARUN), otrack.phi(), otrack.eta());
-          registry.fill(HIST("DCAXY"), Double_t(kDATARUN), otrack.dcaXY());
-          registry.fill(HIST("DCAZ"), Double_t(kDATARUN), otrack.dcaZ());
+          registry.fill(HIST("PhiEta"), Double_t(kDATA), otrack.phi(),
+                        otrack.eta());
+          registry.fill(HIST("DCAXY"), Double_t(kDATA), otrack.dcaXY());
+          registry.fill(HIST("DCAZ"), Double_t(kDATA), otrack.dcaZ());
+          registry.fill(HIST("hrecpt"), Double_t(kDATA), cent, -1, otrack.pt());
         }
         for (auto& track : tracks) {
-          if (std::find(usedTracksIds.begin(), usedTracksIds.end(), track.globalIndex()) != usedTracksIds.end()) {
+          if (std::find(usedTracksIds.begin(), usedTracksIds.end(),
+                        track.globalIndex()) != usedTracksIds.end()) {
             continue;
           }
-          registry.fill(HIST("PhiEta"), Double_t(kDATARUN), track.phi(), track.eta());
-          registry.fill(HIST("DCAXY"), Double_t(kDATARUN), track.dcaXY());
-          registry.fill(HIST("DCAZ"), Double_t(kDATARUN), track.dcaZ());
+          registry.fill(HIST("PhiEta"), Double_t(kDATA), track.phi(),
+                        track.eta());
+          registry.fill(HIST("DCAXY"), Double_t(kDATA), track.dcaXY());
+          registry.fill(HIST("DCAZ"), Double_t(kDATA), track.dcaZ());
+          registry.fill(HIST("hrecpt"), Double_t(kDATA), cent, -1, track.pt());
           tracketas.push_back(track.eta());
         }
 
         for (auto eta : tracketas) {
-          registry.fill(HIST("hrecdndeta"), Double_t(kDATA), Double_t(kMBAND), cent, z, eta);
+          registry.fill(HIST("hrecdndeta"), Double_t(kDATA), Double_t(kMBAND),
+                        cent, z, eta);
         }
       }
     }
   }
   PROCESS_SWITCH(MultiplicityCounter, processCounting, "Count tracks", false);
 
-    void processTrackPt(
-    MyCollisions::iterator const& collision,
-    BCsRun3 const& bcs,
-    aod::FT0s const& ft0s,
-    aod::FV0As const& fv0as,
-    FiTracks const& tracks,
-    soa::SmallGroups<aod::ReassignedTracksCore> const& atracks)
-  {
-    const auto& foundBC = collision.foundBC_as<BCsRun3>();
-    float multT0A = 0;
-    float multT0C = 0;
-    float multV0A = 0;
-    auto cent = collision.centFT0C();
-
-    //registry.fill(HIST("Centrality"), cent);
-    //registry.fill(HIST("Events/Selection"), 1.);
-    auto z = collision.posZ();
-
-    if (!useEvSel || collision.sel8()) {
-      if (std::abs(z) < 10) {
-        /*if (foundBC.has_ft0()) {
-          for (auto amplitude : foundBC.ft0().amplitudeA()) {
-            multT0A += amplitude;
-          }
-          for (auto amplitude : foundBC.ft0().amplitudeC()) {
-            multT0C += amplitude;
-          }
-        } else {
-          multT0A = multT0C = -999;
-        }
-
-        if (foundBC.has_fv0a()) {
-          for (auto amplitude : foundBC.fv0a().amplitude()) {
-            multV0A += amplitude;
-          }
-        } else {
-          multV0A = -999;
-        }*/
-        //registry.fill(HIST("Multiplicity"), multV0A, multT0A, multT0C);
-        //registry.fill(HIST("Centrality_MBAND"), cent);
-
-        //registry.fill(HIST("Events/Selection"), 2.);
-
-        //registry.fill(HIST("hreczvtx"), Double_t(kDATA), Double_t(kMBAND), cent, z);
-        usedTracksIds.clear();
-
-        tracketas.clear();
-        for (auto& track : atracks) {
-          auto otrack = track.track_as<FiTracks>();
-          tracketas.push_back(otrack.eta());
-          //registry.fill(HIST("PhiEta"), Double_t(kDATARUN), otrack.phi(), otrack.eta());
-          //registry.fill(HIST("DCAXY"), Double_t(kDATARUN), otrack.dcaXY());
-          //registry.fill(HIST("DCAZ"), Double_t(kDATARUN), otrack.dcaZ());
-          registry.fill(HIST("hdatapt"), Double_t(kDATARUN), cent, otrack.pt());
-        }
-        for (auto& track : tracks) {
-          if (std::find(usedTracksIds.begin(), usedTracksIds.end(), track.globalIndex()) != usedTracksIds.end()) {
-            continue;
-          }
-          //registry.fill(HIST("PhiEta"), Double_t(kDATARUN), track.phi(), track.eta());
-          //registry.fill(HIST("DCAXY"), Double_t(kDATARUN), track.dcaXY());
-          //registry.fill(HIST("DCAZ"), Double_t(kDATARUN), track.dcaZ());
-          registry.fill(HIST("hdatapt"), Double_t(kDATARUN), cent, track.pt());
-          //tracketas.push_back(track.eta());
-        }
-
-        /*for (auto eta : tracketas) {
-          registry.fill(HIST("hrecdndeta"), Double_t(kDATA), Double_t(kMBAND), cent, z, eta);
-        }*/
-      }
-    }
-  }
-  PROCESS_SWITCH(MultiplicityCounter, processTrackPt, "Tracks Pt data", false);
-
-  expressions::Filter primaries = (aod::mcparticle::flags & (uint8_t)o2::aod::mcparticle::enums::PhysicalPrimary) == (uint8_t)o2::aod::mcparticle::enums::PhysicalPrimary;
+  expressions::Filter primaries =
+    (aod::mcparticle::flags &
+     (uint8_t)o2::aod::mcparticle::enums::PhysicalPrimary) ==
+    (uint8_t)o2::aod::mcparticle::enums::PhysicalPrimary;
   Partition<Particles> mcSample = nabs(aod::mcparticle::eta) < estimatorEta;
   Preslice<FiTracks> perCol = aod::track::collisionId;
-  Partition<soa::Filtered<LabeledTracksEx>> lsample = nabs(aod::track::eta) < estimatorEta;
+  Partition<soa::Filtered<LabeledTracksEx>> lsample =
+    nabs(aod::track::eta) < estimatorEta;
 
   void processMCCounting(
     soa::Join<MyMCCollisions, aod::McCollisionLabels> const& collisions,
-    aod::McCollisions const&,
-    Particles const& mcParticles,
+    aod::McCollisions const&, Particles const& mcParticles,
     soa::Filtered<LabeledTracksEx> const&,
     soa::SmallGroups<aod::ReassignedTracksCore> const& atracks)
   {
@@ -333,10 +300,13 @@ struct MultiplicityCounter {
         continue;
       }
 
-      registry.fill(HIST("hreczvtx"), Double_t(kINEL), Double_t(kMBAND), cent, z);
+      registry.fill(HIST("hreczvtx"), Double_t(kINEL), Double_t(kMBAND), cent,
+                    z);
       auto mcCollision = collision.mcCollision();
-      auto particles = mcSample->sliceByCached(aod::mcparticle::mcCollisionId, mcCollision.globalIndex());
-      auto tracks = lsample->sliceByCached(aod::track::collisionId, collision.globalIndex());
+      auto particles = mcSample->sliceByCached(aod::mcparticle::mcCollisionId,
+                                               mcCollision.globalIndex());
+      auto tracks = lsample->sliceByCached(aod::track::collisionId,
+                                           collision.globalIndex());
       tracks.bindExternalIndices(&mcParticles);
 
       usedTracksIds.clear();
@@ -344,70 +314,34 @@ struct MultiplicityCounter {
         auto ttrack = track.track_as<soa::Filtered<LabeledTracksEx>>();
         usedTracksIds.emplace_back(ttrack.globalIndex());
         if (ttrack.has_mcParticle()) {
-          registry.fill(HIST("hrecdndeta"), Double_t(kINEL), Double_t(kMBAND), cent, z, ttrack.mcParticle_as<Particles>().eta());
-          registry.fill(HIST("PhiEta"), Double_t(kMCRUN), ttrack.phi(), ttrack.eta());
-          registry.fill(HIST("DCAXY"), Double_t(kMCRUN), ttrack.dcaXY());
-          registry.fill(HIST("DCAZ"), Double_t(kMCRUN), ttrack.dcaZ());
+          registry.fill(HIST("hrecdndeta"), Double_t(kINEL), Double_t(kMBAND),
+                        cent, z, ttrack.mcParticle_as<Particles>().eta());
+          registry.fill(HIST("hrecpt"), Double_t(kINEL), cent,
+                        ttrack.mcParticle_as<Particles>().pt(), ttrack.pt());
+
+          registry.fill(HIST("PhiEta"), Double_t(kINEL), ttrack.phi(),
+                        ttrack.eta());
+          registry.fill(HIST("DCAXY"), Double_t(kINEL), ttrack.dcaXY());
+          registry.fill(HIST("DCAZ"), Double_t(kINEL), ttrack.dcaZ());
         } else {
           // when secondary
         }
       }
       for (auto& track : tracks) {
-        if (std::find(usedTracksIds.begin(), usedTracksIds.end(), track.globalIndex()) != usedTracksIds.end()) {
+        if (std::find(usedTracksIds.begin(), usedTracksIds.end(),
+                      track.globalIndex()) != usedTracksIds.end()) {
           continue;
         }
         if (track.has_mcParticle()) {
-          registry.fill(HIST("hrecdndeta"), Double_t(kINEL), Double_t(kMBAND), cent, z, track.mcParticle_as<Particles>().eta());
-          registry.fill(HIST("PhiEta"), Double_t(kMCRUN), track.phi(), track.eta());
-          registry.fill(HIST("DCAXY"), Double_t(kMCRUN), track.dcaXY());
-          registry.fill(HIST("DCAZ"), Double_t(kMCRUN), track.dcaZ());
-        } else {
-          // when secondary
-        }
-      }
-    }
-  }
-  PROCESS_SWITCH(MultiplicityCounter, processMCCounting, "MC Count tracks", false);
+          registry.fill(HIST("hrecdndeta"), Double_t(kINEL), Double_t(kMBAND),
+                        cent, z, track.mcParticle_as<Particles>().eta());
+          registry.fill(HIST("hrecpt"), Double_t(kINEL), cent,
+                        track.mcParticle_as<Particles>().pt(), track.pt());
 
-  void processMCTrackPt(
-    soa::Join<MyMCCollisions, aod::McCollisionLabels> const& collisions,
-    aod::McCollisions const&,
-    Particles const& mcParticles,
-    soa::Filtered<LabeledTracksEx> const&,
-    soa::SmallGroups<aod::ReassignedTracksCore> const& atracks)
-  {
-    auto cent = 50.;
-    for (auto& collision : collisions) {
-      auto z = collision.posZ();
-      if (useEvSel && !collision.sel8()) {
-        if (std::abs(z) > 10) {
-          continue;
-        }
-      }
-      if (!collision.has_mcCollision()) {
-        continue;
-      }
-      auto mcCollision = collision.mcCollision();
-      auto particles = mcSample->sliceByCached(aod::mcparticle::mcCollisionId, mcCollision.globalIndex());
-      auto tracks = lsample->sliceByCached(aod::track::collisionId, collision.globalIndex());
-      tracks.bindExternalIndices(&mcParticles);
-
-      usedTracksIds.clear();
-      for (auto& track : atracks) {
-        auto ttrack = track.track_as<soa::Filtered<LabeledTracksEx>>();
-        usedTracksIds.emplace_back(ttrack.globalIndex());
-        if (ttrack.has_mcParticle()) {
-          registry.fill(HIST("hrecpt"), Double_t(kINEL), cent, ttrack.mcParticle_as<Particles>().pt(), ttrack.pt());
-        } else {
-          // when secondary
-        }
-      }
-      for (auto& track : tracks) {
-        if (std::find(usedTracksIds.begin(), usedTracksIds.end(), track.globalIndex()) != usedTracksIds.end()) {
-          continue;
-        }
-        if (track.has_mcParticle()) {
-          registry.fill(HIST("hrecpt"), Double_t(kINEL), cent, track.mcParticle_as<Particles>().pt(), track.pt());
+          registry.fill(HIST("PhiEta"), Double_t(kINEL), track.phi(),
+                        track.eta());
+          registry.fill(HIST("DCAXY"), Double_t(kINEL), track.dcaXY());
+          registry.fill(HIST("DCAZ"), Double_t(kINEL), track.dcaZ());
         } else {
           // when secondary
         }
@@ -422,27 +356,32 @@ struct MultiplicityCounter {
       }
     }
   }
-  PROCESS_SWITCH(MultiplicityCounter, processMCTrackPt, "MC Tracks Pt gen & Pt rec", false);
+  PROCESS_SWITCH(MultiplicityCounter, processMCCounting, "MC Count tracks",
+                 false);
 
   void processGen(
     aod::McCollisions::iterator const& mcCollision,
-    o2::soa::SmallGroups<soa::Join<aod::Collisions, aod::EvSels, aod::McCollisionLabels>> const& collisions,
+    o2::soa::SmallGroups<soa::Join<aod::Collisions, aod::EvSels,
+                                   aod::McCollisionLabels>> const& collisions,
     Particles const& particles, FiTracks const& tracks)
   {
     auto cent = 50.;
-    auto perCollisionMCSample = mcSample->sliceByCached(aod::mcparticle::mcCollisionId, mcCollision.globalIndex());
+    auto perCollisionMCSample = mcSample->sliceByCached(
+      aod::mcparticle::mcCollisionId, mcCollision.globalIndex());
     auto genz = mcCollision.posZ();
     registry.fill(HIST("hgenzvtx"), Double_t(kINEL), cent, genz);
     for (auto& particle : perCollisionMCSample) {
       auto p = pdg->GetParticle(particle.pdgCode());
       if (p != nullptr) {
         if (std::abs(p->Charge()) >= 3) {
-          registry.fill(HIST("hgendndeta"), Double_t(kINEL), cent, genz, particle.eta());
+          registry.fill(HIST("hgendndeta"), Double_t(kINEL), cent, genz,
+                        particle.eta());
         }
       }
     }
   }
-  PROCESS_SWITCH(MultiplicityCounter, processGen, "Process generator-level info", false);
+  PROCESS_SWITCH(MultiplicityCounter, processGen,
+                 "Process generator-level info", false);
 };
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
