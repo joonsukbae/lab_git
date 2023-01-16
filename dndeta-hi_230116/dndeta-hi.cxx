@@ -9,6 +9,16 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
+#include <Math/Vector4D.h>
+#include <cmath>
+#include <TFile.h>
+#include <TLorentzVector.h>
+#include <TH1F.h>
+#include <TH2F.h>
+#include <TProfile.h>
+#include <TPDGCode.h>
+#include <TDatabasePDG.h>
+
 #include "Framework/ASoAHelpers.h"
 #include "Framework/AnalysisDataModel.h"
 #include "Framework/AnalysisTask.h"
@@ -32,16 +42,6 @@
 #include "ReconstructionDataFormats/GlobalTrackID.h"
 #include "ReconstructionDataFormats/Track.h"
 #include "Index.h"
-
-#include <TFile.h>
-#include <TLorentzVector.h>
-#include <TH1F.h>
-#include <TH2F.h>
-#include <TProfile.h>
-#include <Math/Vector4D.h>
-#include <TPDGCode.h>
-#include <TDatabasePDG.h>
-#include <cmath>
 
 #include "PWGLF/DataModel/LFStrangenessTables.h"
 
