@@ -81,18 +81,18 @@ enum {
   kSpeciesend
 };
 
-AxisSpec ZAxis = {60, -30, 30, "", "zaxis"};
+AxisSpec ZAxis = {60, -30, 30, "Z (cm)", "zaxis"};
 AxisSpec DeltaZAxis = {61, -6.1, 6.1, "", "deltaz axis"};
 AxisSpec DCAAxis = {601, -3.01, 3.01, "", "DCA axis"};
-AxisSpec EtaAxis = {80, -4.0, 4.0, "", "eta axis"};
-AxisSpec PhiAxis = {629, 0, 2 * M_PI, "", "phi axis"};
-AxisSpec PtAxis = {2401, -0.005, 24.005, "", "P_{T} axis"};
+AxisSpec EtaAxis = {80, -4.0, 4.0, "#eta", "eta axis"};
+AxisSpec PhiAxis = {629, 0, 2 * M_PI, "Rad", "phi axis"};
+AxisSpec PtAxis = {2401, -0.005, 24.005, "#it{p}_{T} (GeV/c)", "P_{T} axis"};
 AxisSpec EvtClassAxis = {kECend - 1, kECbegin + 0.5, kECend - 0.5, "", "event class"};
 AxisSpec TrigClassAxis = {kTrigend - 1, kTrigbegin + 0.5, kTrigend - 0.5, "", "trigger class"};
 std::vector<double> centBinning = {0, 10., 20., 30., 40., 50., 60., 70., 80., 100};
 AxisSpec CentAxis = {centBinning, "", "centrality"};
 AxisSpec SpeciesAxis = {kSpeciesend - 1, kSpeciesbegin + 0.5, kSpeciesend - 0.5, "", "species class"};
-AxisSpec massAxis = {600, 0.0f, 3.0f, "TitleTitle", "Inv. Mass (GeV/c^{2})"};
+AxisSpec massAxis = {600, 0.0f, 3.0f, "Mass (GeV/c^{2})", "Inv. Mass (GeV/c^{2})"};
 
 static constexpr TrackSelectionFlags::flagtype trackSelectionITS =
   TrackSelectionFlags::kITSNCls | TrackSelectionFlags::kITSChi2NDF |
