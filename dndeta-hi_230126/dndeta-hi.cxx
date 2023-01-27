@@ -107,8 +107,9 @@ AxisSpec TrigClassAxis = {kTrigend - 1, kTrigbegin + 0.5, kTrigend - 0.5, "", "t
 std::vector<double> centBinning = {0, 10., 20., 30., 40., 50., 60., 70., 80., 100};
 AxisSpec CentAxis = {centBinning, "", "centrality"};
 AxisSpec SpeciesAxis = {kSpeciesend - 1, kSpeciesbegin + 0.5, kSpeciesend - 0.5, "", "species class"};
-AxisSpec massAxisK0short = {180, 0.3f, 0.6f, "Mass (GeV/c^{2})", "Inv. Mass (GeV/c^{2})"};
-AxisSpec massAxisLambda = {180, 1.0f, 1.3f, "Mass (GeV/c^{2})", "Inv. Mass (GeV/c^{2})"};
+AxisSpec massAxis = {600, 0.3f, 1.3f, "Mass (GeV/c^{2})", "Inv. Mass (GeV/c^{2})"};
+//AxisSpec massAxisK0short = {180, 0.3f, 0.6f, "Mass (GeV/c^{2})", "Inv. Mass (GeV/c^{2})"};
+//AxisSpec massAxisLambda = {180, 1.0f, 1.3f, "Mass (GeV/c^{2})", "Inv. Mass (GeV/c^{2})"};
 
 static constexpr TrackSelectionFlags::flagtype trackSelectionITS =
   TrackSelectionFlags::kITSNCls | TrackSelectionFlags::kITSChi2NDF |
@@ -147,7 +148,7 @@ struct MultiplicityCounter {
      {"Centrality_MBAND", " ; centrality_MBAND_FT0C (%) ", {HistType::kTH1F, {CentAxis}}},                                                                //
      {"hrecpt", " eventclass; centrality; pt_gen; pt_rec ", {HistType::kTHnSparseD, {EvtClassAxis, CentAxis, PtAxis, PtAxis}}},                           //
      {"hgenpt", " eventclass; centrality; pt;  ", {HistType::kTHnSparseD, {EvtClassAxis, CentAxis, PtAxis}}},                                             //
-     {"hV0Mass", "species ; evntclass; K0shortMass; LambdaMass; AntiLambdaMass", {HistType::kTHnSparseD, {SpeciesAxis, EvtClassAxis, massAxisK0short, massAxisLambda, massAxisLambda}}}}};
+     {"hV0Mass", "species ; evntclass; K0shortMass; LambdaMass; AntiLambdaMass", {HistType::kTHnSparseD, {SpeciesAxis, EvtClassAxis, massAxis}}}}};
 
   std::vector<int> usedTracksIds;
 
@@ -256,9 +257,9 @@ struct MultiplicityCounter {
           registry.fill(HIST("hrecdndeta"), Double_t(kDATA), Double_t(kMBAND), cent, z, eta);
         }
         for (auto& v0 : fullV0s) {
-          registry.fill(HIST("hV0Mass"), Double_t(kDATA), Double_t(kK0short), v0.mK0Short(), -1, -1);
-          registry.fill(HIST("hV0Mass"), Double_t(kDATA), Double_t(kLambda), -1, v0.mLambda(), -1);
-          registry.fill(HIST("hV0Mass"), Double_t(kDATA), Double_t(kAntilambda), -1, -1, v0.mAntiLambda());
+          registry.fill(HIST("hV0Mass"), Double_t(kDATA), Double_t(kK0short), v0.mK0Short());
+          registry.fill(HIST("hV0Mass"), Double_t(kDATA), Double_t(kLambda), v0.mLambda());
+          registry.fill(HIST("hV0Mass"), Double_t(kDATA), Double_t(kAntilambda), v0.mAntiLambda());
         }
       }
     }
