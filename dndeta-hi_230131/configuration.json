@@ -1,0 +1,125 @@
+{
+    "internal-dpl-clock": "",
+    "internal-dpl-aod-reader": {
+        "time-limit": "180",
+        "orbit-offset-enumeration": "0",
+        "orbit-multiplier-enumeration": "0",
+        "start-value-enumeration": "0",
+        "end-value-enumeration": "-1",
+        "step-value-enumeration": "1",
+        "aod-file": "@input_data.txt"
+    },
+    "internal-dpl-injected-dummy-sink": "",
+    "internal-dpl-aod-spawner": "",
+    "internal-dpl-aod-index-builder": "",
+    "timestamp-task": {
+        "verbose": "false",
+        "rct-path": "RCT\/Info\/RunInformation",
+        "orbit-reset-path": "CTP\/Calib\/OrbitReset",
+        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "isRun2MC": "false"
+    },
+    "track-propagation": {
+        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "lutPath": "GLO\/Param\/MatLUT",
+        "geoPath": "GLO\/Config\/GeometryAligned",
+        "grpmagPath": "GLO\/Config\/GRPMagField",
+        "mVtxPath": "GLO\/Calib\/MeanVertex",
+        "minPropagationDistance": "5",
+        "processStandard": "true",
+        "processCovariance": "false"
+    },
+    "bc-selection-task": {
+        "processRun2": "false",
+        "processRun3": "true"
+    },
+    "event-selection-task": {
+        "syst": "pp",
+        "muonSelection": "0",
+        "customDeltaBC": "300",
+        "isMC": "false",
+        "processRun2": "false",
+        "processRun3": "true"
+    },
+    "track-selection": {
+        "isRun3": "true",
+        "itsMatching": "1",
+        "ptMin": "0.100000001",
+        "ptMax": "1e+10",
+        "etaMin": "-0.800000012",
+        "etaMax": "0.800000012"
+    },
+    "ambiguous-track-propagation": {
+        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "geoPath": "GLO\/Config\/GeometryAligned",
+        "grpmagPath": "GLO\/Config\/GRPMagField",
+        "mVtxPath": "GLO\/Calib\/MeanVertex",
+        "processCentral": "true",
+        "processMFT": "false"
+    },
+    "multiplicity-table": {
+        "doVertexZeq": "1",
+        "processRun2": "false",
+        "processRun3": "true"
+    },
+    "centrality-table": {
+        "estRun2V0M": "0",
+        "estRun2SPDtks": "0",
+        "estRun2SPDcls": "0",
+        "estRun2CL0": "0",
+        "estRun2CL1": "0",
+        "estFV0A": "0",
+        "estFT0M": "0",
+        "estFT0A": "0",
+        "estFT0C": "1",
+        "estFDDM": "0",
+        "estNTPV": "0",
+        "ccdburl": "http:\/\/alice-ccdb.cern.ch",
+        "ccdbpath": "Centrality\/Estimators",
+        "genname": "",
+        "processRun2": "false",
+        "processRun3": "true"
+    },
+    "lambdakzero-builder": {
+        "createV0CovMats": "-1",
+        "d_UseAutodetectMode": "false",
+        "mincrossedrows": "70",
+        "dcanegtopv": "0.100000001",
+        "dcapostopv": "0.100000001",
+        "v0cospa": "0.995",
+        "dcav0dau": "1",
+        "v0radius": "0.899999976",
+        "tpcrefit": "0",
+        "d_bz": "-999",
+        "d_UseAbsDCA": "true",
+        "d_UseWeightedPCA": "false",
+        "useMatCorrType": "0",
+        "rejDiffCollTracks": "0",
+        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "grpPath": "GLO\/GRP\/GRP",
+        "grpmagPath": "GLO\/Config\/GRPMagField",
+        "lutPath": "GLO\/Param\/MatLUT",
+        "geoPath": "GLO\/Config\/GeometryAligned",
+        "processRun2": "false",
+        "processRun3": "true"
+    },
+    "multiplicity-counter": {
+        "estimatorEta": "4",
+        "useEvSel": "true",
+        "isMC": "false",
+        "multBinning": {
+            "values": [
+                "10001",
+                "-0.5",
+                "10000.5"
+            ]
+        },
+        "processEventStat": "true",
+        "processCountingWithCent": "true",
+        "processCountingWithoutCent": "false",
+        "processMCCounting": "false",
+        "processGen": "false"
+    },
+    "internal-dpl-aod-global-analysis-file-sink": "",
+    "internal-dpl-aod-writer": ""
+}
