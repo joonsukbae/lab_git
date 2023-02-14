@@ -469,7 +469,7 @@ struct MultiplicityCounter {
           registry.fill(HIST("hProcessCode"), Double_t(kINEL), Double_t(kAll), track.mcParticle_as<Particles>().getProcess());
 
           for (auto MotherIDs = track.mcParticle_as<Particles>().mothersIds().front(); MotherIDs <= track.mcParticle_as<Particles>().mothersIds().back(); MotherIDs++) {
-            auto mother = mcParticles.rawIteratorAt(i);
+            auto mother = mcParticles.rawIteratorAt(MotherIDs);
             auto pdg_mother = mother.pdgCode();
             if (pdg_mother == 310) {
               registry.fill(HIST("hMotherV0Count"), Double_t(kINEL), Double_t(kK0short));
