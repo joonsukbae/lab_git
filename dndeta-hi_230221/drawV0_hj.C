@@ -1,8 +1,9 @@
 #include "BSHelper.cxx"
 #include "Filipad2.h"
 
-#define DrawMass
-#define DrawFitting
+// #define DrawMass
+// #define DrawFitting
+#define DrawMotherV0
 
 enum
 {
@@ -88,13 +89,13 @@ Double_t FitDoubleGaus(Double_t *x, Double_t *par)
 void drawV0_hj()
 {
     /// @root file load - - - - - - - - - - - - - - - -
-    auto mc_file = TFile::Open("../mc/AnalysisResults.mc.root", "open");
-    auto data_file = TFile::Open("../data/AnalysisResults-2.root", "open");
+    auto mc_file = TFile::Open("./AnalysisResults.mc.root", "open");
+    // auto data_file = TFile::Open("../data/AnalysisResults-2.root", "open");
 
     /// - - - - - - - - - - - - - - - - - - - - - - - -
 
     /// @mc object load - - - - - - - - - - - - - - - -
-    auto mc_dir = (TDirectory *)mc_file->Get("multiplicity-counter_id2674");
+    auto mc_dir = (TDirectory *)mc_file->Get("multiplicity-counter/Tracks/ProcessMCCounting");
     mc_dir->cd();
 
     auto mc_RECZVTX = (THnSparse *)gROOT->FindObject("hreczvtx"); // mc reconstructed z-vertex
@@ -108,101 +109,135 @@ void drawV0_hj()
 
     auto mc_V0COUNT = (THnSparse *)gROOT->FindObject("hV0Count"); // mc V0 particle count
     auto mc_v0count = BSTHnSparseHelper(mc_V0COUNT);
-    /// - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    /// @data object load - - - - - - - - - - - - - - - -
-    // auto data_dir = (TDirectory *)data_file->Get("multiplicity-counter_id2661");
-    // data_dir->cd();
+    auto mc_MV0COUNT = (THnSparse *)gROOT->FindObject("hMotherV0Count"); // mc V0 particle count
+    auto mc_mv0count = BSTHnSparseHelper(mc_MV0COUNT);
+//     /// - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    // auto data_RECZVTX = (THnSparse *)gROOT->FindObject("hreczvtx"); // data reconstructed z-vertex
-    // auto data_reczvtx = BSTHnSparseHelper(data_RECZVTX);
+//     /// @data object load - - - - - - - - - - - - - - - -
+//     // auto data_dir = (TDirectory *)data_file->Get("multiplicity-counter_id2661");
+//     // data_dir->cd();
 
-    // auto data_V0MASS = (THnSparse *)gROOT->FindObject("hV0Mass"); // data V0 particle mass
-    // auto data_v0mass = BSTHnSparseHelper(data_V0MASS);
+//     // auto data_RECZVTX = (THnSparse *)gROOT->FindObject("hreczvtx"); // data reconstructed z-vertex
+//     // auto data_reczvtx = BSTHnSparseHelper(data_RECZVTX);
 
-    // auto data_V0DAUETA = (THnSparse *)gROOT->FindObject("hV0DauEta"); // data V0 daughter eta
-    // auto data_v0daueta = BSTHnSparseHelper(data_V0DAUETA);
+//     // auto data_V0MASS = (THnSparse *)gROOT->FindObject("hV0Mass"); // data V0 particle mass
+//     // auto data_v0mass = BSTHnSparseHelper(data_V0MASS);
 
-    // auto data_V0COUNT = (THnSparse *)gROOT->FindObject("hV0Count"); // data V0 particle count
-    // auto data_v0count = BSTHnSparseHelper(data_V0COUNT);
-    /// - - - - - - - - - - - - - - - - - - - - - - - -
+//     // auto data_V0DAUETA = (THnSparse *)gROOT->FindObject("hV0DauEta"); // data V0 daughter eta
+//     // auto data_v0daueta = BSTHnSparseHelper(data_V0DAUETA);
 
-    /// @make histogram - - - - - - - - - - - - - - - -
-    auto HistMCreczvtx = mc_reczvtx.GetTH1("HistMCreczvtx", 3, {kINEL, kMBAND, -1, -1});
+//     // auto data_V0COUNT = (THnSparse *)gROOT->FindObject("hV0Count"); // data V0 particle count
+//     // auto data_v0count = BSTHnSparseHelper(data_V0COUNT);
+//     /// - - - - - - - - - - - - - - - - - - - - - - - -
 
-    auto HistMCK0Shortmass = mc_v0mass.GetTH1("HistMCK0Shortmass", 2, {kINEL, kK0short, -1});
-    auto HistMCLambdamass = mc_v0mass.GetTH1("HistMCLambdamass", 2, {kINEL, kLambda, -1});
-    auto HistMCAntilambdamass = mc_v0mass.GetTH1("HistMCAntilambdamass", 2, {kINEL, kAntilambda, -1});
+//     /// @make histogram - - - - - - - - - - - - - - - -
+    auto HistMCreczvtx =mc_reczvtx.GetTH1("HistMCreczvtx", 2, {kINEL, kMBAND, -1});
 
-    auto HistMCK0ShortDauEta = mc_v0daueta.GetTH1("HistMCK0ShortDauEta", 3, {kINEL, -1, kK0short, -1});
-    auto HistMCLambdaDauEta = mc_v0daueta.GetTH1("HistMCLambdaDauEta", 3, {kINEL, -1, kLambda, -1});
-    auto HistMCAntilambdaDauEta = mc_v0daueta.GetTH1("HistMCAntilambdaDauEta", 3, {kINEL, -1, kAntilambda, -1});
+    auto HistMCK0ShortDauEta = mc_v0daueta.GetTH1("HistMCK0ShortDauEta", 2, {kINEL, -1, 1,-1});
 
-    auto HistMCK0ShortDauEtaPos = mc_v0daueta.GetTH1("HistMCK0ShortDauEtaPos", 3, {kINEL, kPositive, kK0short, -1});
-    auto HistMCK0ShortDauEtaNeg = mc_v0daueta.GetTH1("HistMCK0ShortDauEtaNeg", 3, {kINEL, kNegative, kK0short, -1});
-    auto HistMCLambdaDauEtaPos = mc_v0daueta.GetTH1("HistMCLambdaDauEtaPos", 3, {kINEL, kPositive, kLambda, -1});
-    auto HistMCLambdaDauEtaNeg = mc_v0daueta.GetTH1("HistMCLambdaDauEtaNeg", 3, {kINEL, kNegative, kLambda, -1});
-    auto HistMCAntilambdaDauEtaPos = mc_v0daueta.GetTH1("HistMCAntilambdaDauEtaPos", 3, {kINEL, kPositive, kAntilambda, -1});
-    auto HistMCAntilambdaDauEtaNeg = mc_v0daueta.GetTH1("HistMCAntilambdaDauEtaNeg", 3, {kINEL, kNegative, kAntilambda, -1});
+//     auto HistMCK0Shortmass = mc_v0mass.GetTH1("HistMCK0Shortmass", 2, {kINEL, kK0short, -1});
+//     auto HistMCLambdamass = mc_v0mass.GetTH1("HistMCLambdamass", 2, {kINEL, kLambda, -1});
+//     auto HistMCAntilambdamass = mc_v0mass.GetTH1("HistMCAntilambdamass", 2, {kINEL, kAntilambda, -1});
 
-    // auto HistDATAreczvtx = data_reczvtx.GetTH1("HistDATAreczvtx", 3, {kDATA, kMBAND, -1, -1});
+//     auto HistMCK0ShortDauEta = mc_v0daueta.GetTH1("HistMCK0ShortDauEta", 3, {kINEL, -1, kK0short, -1});
+//     auto HistMCLambdaDauEta = mc_v0daueta.GetTH1("HistMCLambdaDauEta", 3, {kINEL, -1, kLambda, -1});
+//     auto HistMCAntilambdaDauEta = mc_v0daueta.GetTH1("HistMCAntilambdaDauEta", 3, {kINEL, -1, kAntilambda, -1});
 
-    // auto HistDATAK0Shortmass = data_v0mass.GetTH1("HistDATAK0Shortmass", 2, {kDATA, kK0short, -1});
-    // auto HistDATALambdamass = data_v0mass.GetTH1("HistDATALambdamass", 2, {kDATA, kLambda, -1});
-    // auto HistDATAAntilambdamass = data_v0mass.GetTH1("HistDATAAntilambdamass", 2, {kDATA, kAntilambda, -1});
+//     auto HistMCK0ShortDauEtaPos = mc_v0daueta.GetTH1("HistMCK0ShortDauEtaPos", 3, {kINEL, kPositive, kK0short, -1});
+//     auto HistMCK0ShortDauEtaNeg = mc_v0daueta.GetTH1("HistMCK0ShortDauEtaNeg", 3, {kINEL, kNegative, kK0short, -1});
+//     auto HistMCLambdaDauEtaPos = mc_v0daueta.GetTH1("HistMCLambdaDauEtaPos", 3, {kINEL, kPositive, kLambda, -1});
+//     auto HistMCLambdaDauEtaNeg = mc_v0daueta.GetTH1("HistMCLambdaDauEtaNeg", 3, {kINEL, kNegative, kLambda, -1});
+//     auto HistMCAntilambdaDauEtaPos = mc_v0daueta.GetTH1("HistMCAntilambdaDauEtaPos", 3, {kINEL, kPositive, kAntilambda, -1});
+//     auto HistMCAntilambdaDauEtaNeg = mc_v0daueta.GetTH1("HistMCAntilambdaDauEtaNeg", 3, {kINEL, kNegative, kAntilambda, -1});
 
-    // auto HistDATAK0ShortDauEta = data_v0daueta.GetTH1("HistDATAK0ShortDauEta", 3, {kDATA, -1, kK0short, -1});
-    // auto HistDATALambdaDauEta = data_v0daueta.GetTH1("HistDATALambdaDauEta", 3, {kDATA, -1, kLambda, -1});
-    // auto HistDATAAntilambdaDauEta = data_v0daueta.GetTH1("HistDATAAntilambdaDauEta", 3, {kDATA, -1, kAntilambda, -1});
+//     // auto HistDATAreczvtx = data_reczvtx.GetTH1("HistDATAreczvtx", 3, {kDATA, kMBAND, -1, -1});
 
-    // auto HistDATAK0ShortDauEtaPos = data_v0daueta.GetTH1("HistDATAK0ShortDauEtaPos", 3, {kDATA, kPositive, kK0short, -1});
-    // auto HistDATAK0ShortDauEtaNeg = data_v0daueta.GetTH1("HistDATAK0ShortDauEtaNeg", 3, {kDATA, kNegative, kK0short, -1});
-    // auto HistDATALambdaDauEtaPos = data_v0daueta.GetTH1("HistDATALambdaDauEtaPos", 3, {kDATA, kPositive, kLambda, -1});
-    // auto HistDATALambdaDauEtaNeg = data_v0daueta.GetTH1("HistDATALambdaDauEtaNeg", 3, {kDATA, kNegative, kLambda, -1});
-    // auto HistDATAAntilambdaDauEtaPos = data_v0daueta.GetTH1("HistDATAAntilambdaDauEtaPos", 3, {kDATA, kPositive, kAntilambda, -1});
-    // auto HistDATAAntilambdaDauEtaNeg = data_v0daueta.GetTH1("HistDATAAntilambdaDauEtaNeg", 3, {kDATA, kNegative, kAntilambda, -1});
+//     // auto HistDATAK0Shortmass = data_v0mass.GetTH1("HistDATAK0Shortmass", 2, {kDATA, kK0short, -1});
+//     // auto HistDATALambdamass = data_v0mass.GetTH1("HistDATALambdamass", 2, {kDATA, kLambda, -1});
+//     // auto HistDATAAntilambdamass = data_v0mass.GetTH1("HistDATAAntilambdamass", 2, {kDATA, kAntilambda, -1});
 
-    auto HistMCK0ShortV0Count = mc_v0count.GetTH1("HistMCV0Count", 2, {kINEL, kK0short, -1});
-    auto HistMCLambdaV0Count = mc_v0count.GetTH1("HistMCV0Count", 2, {kINEL, kLambda, -1});
-    auto HistMCAntilambdaV0Count = mc_v0count.GetTH1("HistMCV0Count", 2, {kINEL, kAntilambda, -1});
+//     // auto HistDATAK0ShortDauEta = data_v0daueta.GetTH1("HistDATAK0ShortDauEta", 3, {kDATA, -1, kK0short, -1});
+//     // auto HistDATALambdaDauEta = data_v0daueta.GetTH1("HistDATALambdaDauEta", 3, {kDATA, -1, kLambda, -1});
+//     // auto HistDATAAntilambdaDauEta = data_v0daueta.GetTH1("HistDATAAntilambdaDauEta", 3, {kDATA, -1, kAntilambda, -1});
 
-    // auto HistDATAK0ShortV0Count = data_v0count.GetTH1("HistDATAV0Count", 2, {kDATA, kK0short, -1});
-    // auto HistDATALambdaV0Count = data_v0count.GetTH1("HistDATAV0Count", 2, {kDATA, kLambda, -1});
-    // auto HistDATAAntilambdaV0Count = data_v0count.GetTH1("HistDATAV0Count", 2, {kDATA, kAntilambda, -1});
-    /// - - - - - - - - - - - - - - - - - - - - - - -
+//     // auto HistDATAK0ShortDauEtaPos = data_v0daueta.GetTH1("HistDATAK0ShortDauEtaPos", 3, {kDATA, kPositive, kK0short, -1});
+//     // auto HistDATAK0ShortDauEtaNeg = data_v0daueta.GetTH1("HistDATAK0ShortDauEtaNeg", 3, {kDATA, kNegative, kK0short, -1});
+//     // auto HistDATALambdaDauEtaPos = data_v0daueta.GetTH1("HistDATALambdaDauEtaPos", 3, {kDATA, kPositive, kLambda, -1});
+//     // auto HistDATALambdaDauEtaNeg = data_v0daueta.GetTH1("HistDATALambdaDauEtaNeg", 3, {kDATA, kNegative, kLambda, -1});
+//     // auto HistDATAAntilambdaDauEtaPos = data_v0daueta.GetTH1("HistDATAAntilambdaDauEtaPos", 3, {kDATA, kPositive, kAntilambda, -1});
+//     // auto HistDATAAntilambdaDauEtaNeg = data_v0daueta.GetTH1("HistDATAAntilambdaDauEtaNeg", 3, {kDATA, kNegative, kAntilambda, -1});
 
-    /// @make histogram - - - - - - - - - - - - - - - -
+    auto HistMCK0ShortV0Count = mc_v0count.GetTH1("HistMCV0Count", 1, {kINEL, -1 , 3});
+    auto HistMCLambdaV0Count = mc_v0count.GetTH1("HistMCV0Count", 1, {kINEL, kLambda, 2});
+    auto HistMCAntilambdaV0Count = mc_v0count.GetTH1("HistMCV0Count", 1, {kINEL, kAntilambda, 2});
+
+//     // auto HistDATAK0ShortV0Count = data_v0count.GetTH1("HistDATAV0Count", 2, {kDATA, kK0short, -1});
+//     // auto HistDATALambdaV0Count = data_v0count.GetTH1("HistDATAV0Count", 2, {kDATA, kLambda, -1});
+//     // auto HistDATAAntilambdaV0Count = data_v0count.GetTH1("HistDATAV0Count", 2, {kDATA, kAntilambda, -1});
+    
+    // auto HistMCMotherV0Count = mc_mv0count.GetTH1("HistMCMotherV0Count",1,{kINEL,-1});
+
+//     /// - - - - - - - - - - - - - - - - - - - - - - -
+
+//     /// @make histogram - - - - - - - - - - - - - - - -
     auto NormalizationValueMC = HistMCreczvtx->Integral(HistMCreczvtx->FindBin(-10), HistMCreczvtx->FindBin(10));
-    // auto NormalizationValueDATA = HistDATAreczvtx->Integral(HistDATAreczvtx->FindBin(-10), HistDATAreczvtx->FindBin(10));
+//     // auto NormalizationValueDATA = HistDATAreczvtx->Integral(HistDATAreczvtx->FindBin(-10), HistDATAreczvtx->FindBin(10));
 
-    HistMCK0Shortmass->Scale(1. / NormalizationValueMC, "width");
-    HistMCLambdamass->Scale(1. / NormalizationValueMC, "width");
-    HistMCAntilambdamass->Scale(1. / NormalizationValueMC, "width");
+//     HistMCK0Shortmass->Scale(1. / NormalizationValueMC, "width");
+//     HistMCLambdamass->Scale(1. / NormalizationValueMC, "width");
+//     HistMCAntilambdamass->Scale(1. / NormalizationValueMC, "width");
 
-    HistMCK0ShortDauEtaPos->Scale(1. / NormalizationValueMC, "width");
-    HistMCK0ShortDauEtaNeg->Scale(1. / NormalizationValueMC, "width");
+    HistMCK0ShortDauEta->Scale(1. / NormalizationValueMC, "width");
 
-    HistMCLambdaDauEtaPos->Scale(1. / NormalizationValueMC, "width");
-    HistMCLambdaDauEtaNeg->Scale(1. / NormalizationValueMC, "width");
+     HistMCK0ShortV0Count->Scale(1. / NormalizationValueMC, "width");
+    HistMCLambdaV0Count->Scale(1. / NormalizationValueMC, "width");
+    HistMCAntilambdaV0Count->Scale(1. / NormalizationValueMC, "width");
 
-    HistMCAntilambdaDauEtaPos->Scale(1. / NormalizationValueMC, "width");
-    HistMCAntilambdaDauEtaNeg->Scale(1. / NormalizationValueMC, "width");
+//     HistMCK0ShortDauEtaPos->Scale(1. / NormalizationValueMC, "width");
+//     HistMCK0ShortDauEtaNeg->Scale(1. / NormalizationValueMC, "width");
 
-    // HistDATAK0Shortmass->Scale(1. / NormalizationValueDATA, "width");
-    // HistDATALambdamass->Scale(1. / NormalizationValueDATA, "width");
-    // HistDATAAntilambdamass->Scale(1. / NormalizationValueDATA, "width");
+//     HistMCLambdaDauEtaPos->Scale(1. / NormalizationValueMC, "width");
+//     HistMCLambdaDauEtaNeg->Scale(1. / NormalizationValueMC, "width");
 
-    // HistDATAK0ShortDauEtaPos->Scale(1. / NormalizationValueDATA, "width");
-    // HistDATAK0ShortDauEtaNeg->Scale(1. / NormalizationValueDATA, "width");
+//     HistMCAntilambdaDauEtaPos->Scale(1. / NormalizationValueMC, "width");
+//     HistMCAntilambdaDauEtaNeg->Scale(1. / NormalizationValueMC, "width");
 
-    // HistDATALambdaDauEtaPos->Scale(1. / NormalizationValueDATA, "width");
-    // HistDATALambdaDauEtaNeg->Scale(1. / NormalizationValueDATA, "width");
+    // HistMCMotherV0Count->Scale(1. / NormalizationValueMC,"width");
+//     // HistDATAK0Shortmass->Scale(1. / NormalizationValueDATA, "width");
+//     // HistDATALambdamass->Scale(1. / NormalizationValueDATA, "width");
+//     // HistDATAAntilambdamass->Scale(1. / NormalizationValueDATA, "width");
 
-    // HistDATAAntilambdaDauEtaPos->Scale(1. / NormalizationValueDATA, "width");
-    // HistDATAAntilambdaDauEtaNeg->Scale(1. / NormalizationValueDATA, "width");
-    /// - - - - - - - - - - - - - - - - - - - - - - -
+//     // HistDATAK0ShortDauEtaPos->Scale(1. / NormalizationValueDATA, "width");
+//     // HistDATAK0ShortDauEtaNeg->Scale(1. / NormalizationValueDATA, "width");
 
-/// @draw histogram - - - - - - - - - - - - - - - -
+//     // HistDATALambdaDauEtaPos->Scale(1. / NormalizationValueDATA, "width");
+//     // HistDATALambdaDauEtaNeg->Scale(1. / NormalizationValueDATA, "width");
+
+//     // HistDATAAntilambdaDauEtaPos->Scale(1. / NormalizationValueDATA, "width");
+//     // HistDATAAntilambdaDauEtaNeg->Scale(1. / NormalizationValueDATA, "width");
+//     /// - - - - - - - - - - - - - - - - - - - - - - -
+
+// /// @draw histogram - - - - - - - - - - - - - - - -
+// TCanvas c99 = new TCanvas("c99","c99",800,600);
+// HistMCK0ShortDauEta->Draw("hist][text0");
+// auto c1 = new TCanvas("c1","c1",800,600);
+gStyle->SetOptStat(0);
+HistMCK0ShortV0Count->Draw("hist][text0");
+HistMCK0ShortV0Count->SetTitle("V0 count after cut");
+HistMCK0ShortV0Count->GetXaxis()->SetTitle("Species");
+HistMCK0ShortV0Count->GetYaxis()->SetTitle("Count [#]");
+HistMCK0ShortV0Count->GetXaxis()->ChangeLabel(1,-1,-1,-1,-1,-1," ");
+HistMCK0ShortV0Count->GetXaxis()->ChangeLabel(3,-1,-1,-1,-1,-1," ");
+HistMCK0ShortV0Count->GetXaxis()->ChangeLabel(5,-1,-1,-1,-1,-1," ");
+HistMCK0ShortV0Count->GetXaxis()->ChangeLabel(7,-1,-1,-1,-1,-1," ");
+HistMCK0ShortV0Count->GetXaxis()->ChangeLabel(2,-1,-1,-1,-1,-1,"K^{0}_{s}");
+HistMCK0ShortV0Count->GetXaxis()->ChangeLabel(4,-1,-1,-1,-1,-1,"#Lambda");
+HistMCK0ShortV0Count->GetXaxis()->ChangeLabel(6,-1,-1,-1,-1,-1,"#bar{#Lambda}");
+// auto c2 = new TCanvas("c2","c2",800,600);
+// HistMCLambdaV0Count->Draw("hist][text0");
+// auto c3 = new TCanvas("c3","c3",800,600);
+// HistMCAntilambdaV0Count->Draw("hist][text0");
 
 /// mass
 #ifdef DrawMass
@@ -1154,4 +1189,10 @@ void drawV0_hj()
     l15b->Draw("same");
 
 #endif
+
+// #ifdef DrawMotherV0
+// TCanvas c99 = new TCanvas("c99","c99",800,600);
+// HistMCMotherV0Count->Draw("][");
+
+// #endif
 }
